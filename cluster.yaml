@@ -1,0 +1,53 @@
+apiVersion: "clickhouse.altinity.com/v1"
+kind: "ClickHouseInstallation"
+metadata:
+  name: "herc"
+spec:
+  # Templates are specified for all clusters ... if you want explicitly for each cluster then apply below
+  defaults:
+    templates:
+      podTemplate: clickhouse
+      dataVolumeClaimTemplate: data-volume-clickhouse
+      logVolumeClaimTemplate: data-volume-clickhouse
+  configuration:
+    clusters:
+      - name: "herc-cluster"
+        layout:
+          shardsCount: 2
+          replicasCount: 2
+    zookeeper:
+      nodes:
+        - host: zookeeper.ch-zookeeper
+          port: 2181
+  templates:
+    podTemplates:
+      - name: clickhouse
+        spec:
+          securityContext:
+            runAsUser: 101
+            runAsGroup: 101
+            fsGroup: 101
+          containers:
+            - name: clickhouse
+              image: yandex/clickhouse-server:21.10
+              ports:
+                - name: http
+                  containerPort: 8123
+                - name: client
+                  containerPort: 9000
+                - name: interserver
+                  containerPort: 9009
+              volumeMounts:
+                - name: data-volume-clickhouse
+                  mountPath: /var/lib/clickhouse
+                - name: data-volume-clickhouse
+                  mountPath: /var/log/clickhouse-server
+    volumeClaimTemplates:
+      - name: data-volume-clickhouse
+        reclaimPolicy: Retain
+        spec:
+          accessModes:
+            - ReadWriteOnce
+          resources:
+            requests:
+              storage: 15Gi
