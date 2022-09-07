@@ -1,9 +1,0 @@
-#!/bin/bash
-
-CH_NAMESPACE="${CH_NAMESPACE:-clickhouse-opp}"
-
-CUR_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)"
-
-#kubectl create namespace "${CH_NAMESPACE}"
-
-kubectl apply -n "${CH_NAMESPACE}" -f "${CUR_DIR}/cluster.yaml"
